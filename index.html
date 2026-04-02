@@ -2,123 +2,156 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lukarix Sızdırma(Caldı PDF</title>
+<title>Lukarix Dinkulturu sızdırma pdf</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
+    font-family: Arial;
+    background: linear-gradient(135deg,#0f2027,#2c5364);
     overflow: hidden;
 }
 
-/* GLOW ARKA PLAN */
-.bg {
+/* LOGIN */
+.login {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-.circle {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(0,255,255,0.2);
-    animation: float 6s infinite ease-in-out;
-}
-
-.circle:nth-child(1){ width:200px; height:200px; top:10%; left:10%; }
-.circle:nth-child(2){ width:150px; height:150px; top:60%; left:70%; }
-.circle:nth-child(3){ width:100px; height:100px; top:40%; left:30%; }
-
-@keyframes float {
-    0%,100% { transform: translateY(0px);}
-    50% { transform: translateY(-30px);}
-}
-
-/* LOGIN BOX */
-.login-box {
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    top:50%;
+    left:50%;
     transform: translate(-50%,-50%);
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.1);
     padding: 30px;
     border-radius: 20px;
+    text-align:center;
     backdrop-filter: blur(10px);
-    text-align: center;
-    box-shadow: 0 0 25px rgba(0,255,255,0.3);
-}
-
-.login-box h2 {
-    color: #fff;
-    margin-bottom: 20px;
 }
 
 input {
-    padding: 10px;
-    border: none;
-    border-radius: 10px;
-    width: 200px;
-    margin-bottom: 15px;
-    outline: none;
+    padding:10px;
+    border-radius:10px;
+    border:none;
 }
 
 button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 10px;
-    background: cyan;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
+    padding:10px 20px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:cyan;
 }
 
-button:hover {
-    background: white;
+/* VIEWER */
+#viewer {
+    display:none;
+    height:100vh;
+    overflow:auto;
+    text-align:center;
 }
 
-/* PDF */
-#pdfFrame {
-    display: none;
-    width: 100%;
-    height: 100vh;
-    border: none;
+canvas {
+    margin:10px;
+    box-shadow:0 0 15px black;
+}
+
+/* TOP BAR */
+.toolbar {
+    position:fixed;
+    top:0;
+    width:100%;
+    background:black;
+    color:white;
+    padding:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="bg">
-    <div class="circle"></div>
-    <div class="circle"></div>
-    <div class="circle"></div>
-</div>
-
-<div class="login-box" id="loginBox">
-    <h2>🔐 Sızdırılmış PDF</h2>
-    <input type="password" id="password" placeholder="Şifre gir">
+<div class="login" id="loginBox">
+    <h2 style="color:white;">🔐Sızdırma senaryo PDF Giriş</h2>
+    <input type="password" id="pass" placeholder="Şifre">
     <br>
-    <button onclick="checkPassword()">Giriş Yap</button>
-    <p id="error" style="color:red;"></p>
+    <button onclick="login()">Giriş</button>
+    <p id="err" style="color:red;"></p>
 </div>
 
-<iframe id="pdfFrame" src=""></iframe>
+<div id="viewer">
+    <div class="toolbar">
+        <button onclick="prevPage()">⬅</button>
+        <span id="pageInfo"></span>
+        <button onclick="nextPage()">➡</button>
+        <button onclick="zoomIn()">🔍+</button>
+        <button onclick="zoomOut()">🔍-</button>
+    </div>
+    <div id="pdfContainer"></div>
+</div>
 
 <script>
-function checkPassword() {
-    const pass = document.getElementById("password").value;
+let pdfDoc = null;
+let pageNum = 1;
+let scale = 1.5;
 
-    if(pass === "LukarixYZ") {
-        document.getElementById("loginBox").style.display = "none";
-        const frame = document.getElementById("pdfFrame");
-        frame.style.display = "block";
-        frame.src = "Dinkulturu 7. sınıf 2. donem 1. yazılı(____________Koleji.pdf";
+function login() {
+    if(document.getElementById("pass").value === "LukarixYZ") {
+        document.getElementById("loginBox").style.display="none";
+        document.getElementById("viewer").style.display="block";
+        loadPDF();
     } else {
-        document.getElementById("error").innerText = "❌ Yanlış şifre!";
+        document.getElementById("err").innerText="Yanlış şifre!";
     }
+}
+
+function loadPDF() {
+    const url = "Dinkulturu 7. sınıf 2. donem 1. yazılı(____________Koleji.pdf";
+
+    pdfjsLib.getDocument(url).promise.then(pdf => {
+        pdfDoc = pdf;
+        renderPage(pageNum);
+    });
+}
+
+function renderPage(num) {
+    pdfDoc.getPage(num).then(page => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const viewport = page.getViewport({scale: scale});
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        document.getElementById("pdfContainer").innerHTML="";
+        document.getElementById("pdfContainer").appendChild(canvas);
+
+        page.render({canvasContext: ctx, viewport: viewport});
+
+        document.getElementById("pageInfo").innerText =
+            num + " / " + pdfDoc.numPages;
+    });
+}
+
+function nextPage() {
+    if(pageNum < pdfDoc.numPages) {
+        pageNum++;
+        renderPage(pageNum);
+    }
+}
+
+function prevPage() {
+    if(pageNum > 1) {
+        pageNum--;
+        renderPage(pageNum);
+    }
+}
+
+function zoomIn() {
+    scale += 0.2;
+    renderPage(pageNum);
+}
+
+function zoomOut() {
+    scale -= 0.2;
+    renderPage(pageNum);
 }
 </script>
 
