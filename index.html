@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lukarix Sızdırma(Caldı PDF</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
+    overflow: hidden;
+}
+
+/* GLOW ARKA PLAN */
+.bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(0,255,255,0.2);
+    animation: float 6s infinite ease-in-out;
+}
+
+.circle:nth-child(1){ width:200px; height:200px; top:10%; left:10%; }
+.circle:nth-child(2){ width:150px; height:150px; top:60%; left:70%; }
+.circle:nth-child(3){ width:100px; height:100px; top:40%; left:30%; }
+
+@keyframes float {
+    0%,100% { transform: translateY(0px);}
+    50% { transform: translateY(-30px);}
+}
+
+/* LOGIN BOX */
+.login-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: rgba(255,255,255,0.08);
+    padding: 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0,255,255,0.3);
+}
+
+.login-box h2 {
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+input {
+    padding: 10px;
+    border: none;
+    border-radius: 10px;
+    width: 200px;
+    margin-bottom: 15px;
+    outline: none;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: cyan;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: white;
+}
+
+/* PDF */
+#pdfFrame {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    border: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
+
+<div class="login-box" id="loginBox">
+    <h2>🔐 Sızdırılmış PDF</h2>
+    <input type="password" id="password" placeholder="Şifre gir">
+    <br>
+    <button onclick="checkPassword()">Giriş Yap</button>
+    <p id="error" style="color:red;"></p>
+</div>
+
+<iframe id="pdfFrame" src=""></iframe>
+
+<script>
+function checkPassword() {
+    const pass = document.getElementById("password").value;
+
+    if(pass === "LukarixYZ") {
+        document.getElementById("loginBox").style.display = "none";
+        const frame = document.getElementById("pdfFrame");
+        frame.style.display = "block";
+        frame.src = "Dinkulturu 7. sınıf 2. donem 1. yazılı(____________Koleji.pdf";
+    } else {
+        document.getElementById("error").innerText = "❌ Yanlış şifre!";
+    }
+}
+</script>
+
+</body>
+</html>
